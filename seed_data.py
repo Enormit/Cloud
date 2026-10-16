@@ -33,8 +33,8 @@ def get_dynamo_resource():
     kwargs: Dict[str, Any] = {"region_name": REGION}
     if ENDPOINT:
         kwargs["endpoint_url"] = ENDPOINT
-        kwargs["aws_access_key_id"] = os.getenv("AWS_ACCESS_KEY_ID", "mock_key")
-        kwargs["aws_secret_access_key"] = os.getenv("AWS_SECRET_ACCESS_KEY", "mock_secret")
+        kwargs["aws_access_key_id"] = "dummy"
+        kwargs["aws_secret_access_key"] = "dummy"
         print(f"Connecting to DynamoDB at {ENDPOINT}")
     else:
         print(f"Connecting to AWS DynamoDB in region {REGION}")
@@ -45,8 +45,8 @@ def get_dynamo_client():
     kwargs: Dict[str, Any] = {"region_name": REGION}
     if ENDPOINT:
         kwargs["endpoint_url"] = ENDPOINT
-        kwargs["aws_access_key_id"] = os.getenv("AWS_ACCESS_KEY_ID", "mock_key")
-        kwargs["aws_secret_access_key"] = os.getenv("AWS_SECRET_ACCESS_KEY", "mock_secret")
+        kwargs["aws_access_key_id"] = "dummy"
+        kwargs["aws_secret_access_key"] = "dummy"
     return boto3.client("dynamodb", **kwargs)
 
 
@@ -378,6 +378,21 @@ def seed_data(dynamodb):
 if __name__ == "__main__":
     resource = get_dynamo_resource()
     client = get_dynamo_client()
+    
+    # Wait for DynamoDB to be ready
+    max_retries = 30
+    for i in range(max_retries):
+        try:
+            client.list_tables()
+            print("Successfully connected to DynamoDB.")
+            break
+        except Exception as e:
+            if i == max_retries - 1:
+                print(f"Failed to connect to DynamoDB after {max_retries} attempts: {e}")
+                raise
+            print(f"Waiting for DynamoDB to be ready... ({i+1}/{max_retries})")
+            time.sleep(1)
+
     create_tables(resource, client)
     time.sleep(1)
     seed_data(resource)

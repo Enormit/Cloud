@@ -45,6 +45,10 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - AWS_ACCESS_KEY_ID=mock_key
+      - AWS_SECRET_ACCESS_KEY=mock_secret
+      - AWS_DEFAULT_REGION=ap-southeast-1
     volumes:
       - ./backend:/app
       - ~/.aws:/root/.aws:ro

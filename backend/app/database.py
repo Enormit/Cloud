@@ -28,10 +28,9 @@ def get_dynamodb_resource():
 
     if endpoint:
         kwargs["endpoint_url"] = endpoint
-        # For local testing, supply dummy credentials if not present
-        if "aws_access_key_id" not in kwargs:
-            kwargs["aws_access_key_id"] = os.getenv("AWS_ACCESS_KEY_ID", "mock_key")
-            kwargs["aws_secret_access_key"] = os.getenv("AWS_SECRET_ACCESS_KEY", "mock_secret")
+        # For local testing, supply dummy credentials
+        kwargs["aws_access_key_id"] = "dummy"
+        kwargs["aws_secret_access_key"] = "dummy"
         logger.info(f"Connecting to DynamoDB at custom endpoint: {endpoint}")
     else:
         logger.info(f"Connecting to AWS DynamoDB in region: {settings.DYNAMODB_REGION}")
@@ -49,8 +48,8 @@ def get_dynamodb_client():
 
     if endpoint:
         kwargs["endpoint_url"] = endpoint
-        kwargs["aws_access_key_id"] = os.getenv("AWS_ACCESS_KEY_ID", "mock_key")
-        kwargs["aws_secret_access_key"] = os.getenv("AWS_SECRET_ACCESS_KEY", "mock_secret")
+        kwargs["aws_access_key_id"] = "dummy"
+        kwargs["aws_secret_access_key"] = "dummy"
 
     return boto3.client("dynamodb", **kwargs)
 

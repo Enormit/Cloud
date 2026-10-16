@@ -21,16 +21,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/registrations", tags=["Registrations"])
 
 
-def check_registration_window() -> Tuple_Window:
-    """Check if course registration window is currently open."""
-    pass
-
-
 class Tuple_Window:
     def __init__(self, is_open: bool, window_info: Optional[Dict[str, Any]], message: str):
         self.is_open = is_open
         self.window_info = window_info
         self.message = message
+
+
+def check_registration_window() -> Tuple_Window:
+    """Check if course registration window is currently open."""
+    return get_active_window()
 
 
 def get_active_window() -> Tuple_Window:
