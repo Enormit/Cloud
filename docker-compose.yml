@@ -1,0 +1,76 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. DynamoDB Local (For local development & testing without AWS account)
+  # ----------------------------------------------------------------------------
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
+    ports:
+      - "8001:8000"
+    networks:
+      - app-network
+
+  # ----------------------------------------------------------------------------
+  # 2. Database Initializer & Seeder
+  # ----------------------------------------------------------------------------
+  db-init:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: course-registration-db-init
+    volumes:
+      - ./seed_data.py:/app/seed_data.py:ro
+    environment:
+      - USE_LOCAL_DYNAMODB=true
+      - DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      - DYNAMODB_REGION=ap-southeast-1
+      - AWS_ACCESS_KEY_ID=mock_key
+      - AWS_SECRET_ACCESS_KEY=mock_secret
+    command: ["python", "/app/seed_data.py"]
+    depends_on:
+      - dynamodb-local
+    networks:
+      - app-network
+
+  # ----------------------------------------------------------------------------
+  # 3. Backend (FastAPI + Boto3 DynamoDB/SES/Secrets Manager)
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: course-registration-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ~/.aws:/root/.aws:ro
+    depends_on:
+      - db-init
+    networks:
+      - app-network
+
+  # ----------------------------------------------------------------------------
+  # 4. Frontend (React 18 + Nginx Reverse Proxy)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: course-registration-frontend
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
