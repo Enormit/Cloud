@@ -7,6 +7,8 @@ import {
   Calendar,
   BookOpen,
   Award,
+  Settings,
+  User as UserIcon,
 } from "lucide-react";
 import { logout } from "../api";
 
@@ -16,6 +18,7 @@ export default function Navbar({
   activeTab,
   setActiveTab,
   onOpenInbox,
+  onOpenProfile,
   inboxCount = 0,
 }) {
   const credits = stats?.total_registered_credits || 0;
@@ -232,14 +235,26 @@ export default function Navbar({
             )}
           </button>
 
-          {/* User Profile Card */}
+          {/* User Profile Card (Clickable to open edit modal) */}
           <div
+            id="user-profile-badge"
+            onClick={onOpenProfile}
+            role="button"
+            tabIndex={0}
+            title="Nhấn để chỉnh sửa email và thông tin cá nhân"
             style={{
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              padding: "4px 8px",
+              padding: "4px 10px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)")}
           >
             <div
               style={{
@@ -258,8 +273,9 @@ export default function Navbar({
               {user?.first_name ? user.first_name[0] : user?.username?.[0]?.toUpperCase() || "S"}
             </div>
             <div style={{ textAlign: "left", lineHeight: 1.2 }}>
-              <div style={{ fontWeight: 600, fontSize: "13px", color: "#fff" }}>
-                {user?.full_name || user?.username}
+              <div style={{ fontWeight: 600, fontSize: "13px", color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span>{user?.full_name || user?.username}</span>
+                <Settings size={12} color="var(--text-muted)" />
               </div>
               <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
                 MSSV: <span style={{ color: "#38bdf8" }}>{user?.mssv}</span>

@@ -19,8 +19,18 @@ class UserOut(BaseModel):
     last_name: str
     full_name: str
     major: Optional[str] = "Công nghệ Thông tin"
+    phone: Optional[str] = ""
+    address: Optional[str] = ""
     is_staff: bool = False
     is_active: bool = True
+
+
+class UserProfileUpdate(BaseModel):
+    email: Optional[EmailStr] = Field(None, description="Địa chỉ email cá nhân nhận thông báo")
+    first_name: Optional[str] = Field(None, max_length=50, description="Họ và tên đệm")
+    last_name: Optional[str] = Field(None, max_length=50, description="Tên sinh viên")
+    phone: Optional[str] = Field(None, max_length=20, description="Số điện thoại liên hệ")
+    address: Optional[str] = Field(None, max_length=255, description="Địa chỉ thường trú / tạm trú")
 
 
 class TokenResponse(BaseModel):

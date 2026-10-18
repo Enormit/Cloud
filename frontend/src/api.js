@@ -74,6 +74,11 @@ export const api = {
       body: JSON.stringify({ username_or_mssv, password }),
     }),
   getMe: () => request("/auth/me"),
+  updateProfile: (profileData) =>
+    request("/auth/profile", {
+      method: "PUT",
+      body: JSON.stringify(profileData),
+    }),
 
   // Courses
   getCourses: (search = "", department = "") => {

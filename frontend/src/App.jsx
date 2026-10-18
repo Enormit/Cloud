@@ -20,7 +20,7 @@ export default function App() {
   return (
     <div>
       {user && token ? (
-        <DashboardPage user={user} onLogout={logout} />
+        <DashboardPage user={user} onLogout={logout} onUpdateUser={setUser} />
       ) : (
         <LoginPage onLoginSuccess={handleLoginSuccess} />
       )}

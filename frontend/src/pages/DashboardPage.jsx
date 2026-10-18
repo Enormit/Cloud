@@ -19,9 +19,12 @@ import RegisteredCourses from "../components/RegisteredCourses";
 import EmailInboxModal from "../components/EmailInboxModal";
 import CourseDetailModal from "../components/CourseDetailModal";
 import AdminDashboard from "../components/AdminDashboard";
+import ProfileModal from "../components/ProfileModal";
 
-export default function DashboardPage({ user, onLogout }) {
+export default function DashboardPage({ user, onLogout, onUpdateUser }) {
+  const [currentUser, setCurrentUser] = useState(user);
   const [activeTab, setActiveTab] = useState("courses"); // courses | timetable | registered | admin
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [courses, setCourses] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [stats, setStats] = useState(null);
@@ -128,11 +131,12 @@ export default function DashboardPage({ user, onLogout }) {
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Navbar */}
       <Navbar
-        user={user}
+        user={currentUser}
         stats={stats}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenInbox={() => setShowInboxModal(true)}
+        onOpenProfile={() => setShowProfileModal(true)}
         inboxCount={emails.length}
       />
 
@@ -328,6 +332,20 @@ export default function DashboardPage({ user, onLogout }) {
           onClose={() => setShowInboxModal(false)}
           onRefresh={loadAllData}
           loading={loadingData}
+        />
+      )}
+
+      {/* User Profile Modal */}
+      {showProfileModal && (
+        <ProfileModal
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          user={currentUser}
+          onProfileUpdated={(updated) => {
+            setCurrentUser(updated);
+            if (onUpdateUser) onUpdateUser(updated);
+            showToast("success", "Đã cập nhật thông tin cá nhân và email thành công!");
+          }}
         />
       )}
 

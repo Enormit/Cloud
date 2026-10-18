@@ -1,0 +1,151 @@
+name: CI/CD Pipeline - Course Registration System
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPOSITORY: course-reg-backend
+  ECS_CLUSTER: course-reg-cluster
+  ECS_SERVICE: course-reg-backend-service
+  S3_BUCKET: course-reg-frontend-production
+
+jobs:
+  # =========================================================================
+  # 1. TEST & LINT BACKEND
+  # =========================================================================
+  backend-ci:
+    name: Backend CI (Test & Lint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pytest httpx
+
+      - name: Code Syntax & Style Check
+        run: |
+          cd backend
+          # Stop build if there are Python syntax errors or undefined names
+          flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Verify App Imports & Schemas
+        run: |
+          cd backend
+          python -c "from app.main import app; print('Backend loaded successfully:', app.title)"
+
+  # =========================================================================
+  # 2. TEST & BUILD FRONTEND
+  # =========================================================================
+  frontend-ci:
+    name: Frontend CI (Build & Lint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build React App (Vite)
+        run: |
+          cd frontend
+          npm run build
+        env:
+          VITE_API_BASE_URL: /api
+
+  # =========================================================================
+  # 3. BUILD DOCKER IMAGE & DEPLOY TO AWS (Chỉ chạy trên branch main)
+  # =========================================================================
+  deploy:
+    name: Deploy to AWS (ECR + ECS Fargate + S3)
+    needs: [backend-ci, frontend-ci]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ----------------- BACKEND: BUILD & PUSH ECR & UPDATE ECS -----------------
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Backend Image to Amazon ECR
+        id: build-backend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Deploy Backend to Amazon ECS Service
+        run: |
+          echo "Triggering new deployment on ECS Fargate..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
+
+      # ----------------- FRONTEND: BUILD & DEPLOY S3 & CLOUDFRONT -----------------
+      - name: Setup Node.js for Frontend Release
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Frontend Production Artifacts
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+        env:
+          VITE_API_BASE_URL: /api
+
+      - name: Deploy Frontend to S3
+        run: |
+          echo "Syncing frontend dist files to S3..."
+          aws s3 sync ./frontend/dist s3://${{ env.S3_BUCKET }} --delete
+
+      - name: Invalidate CloudFront Cache (Optional)
+        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
