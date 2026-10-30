@@ -17,6 +17,7 @@ module "networking" {
   public_subnet_cidrs            = var.public_subnet_cidrs
   private_subnet_cidrs           = var.private_subnet_cidrs
   alb_security_group_id          = module.security.alb_security_group_id
+  ecs_security_group_id          = module.security.ecs_security_group_id
   acm_certificate_arn            = module.security.acm_certificate_arn
   cloudfront_custom_header_token = random_password.cloudfront_origin_verify_header.result
 }
@@ -35,6 +36,21 @@ module "security" {
   domain_name = var.domain_name
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
+}
+
+# Lambda Email Worker Module (Google Mail via Serverless Lambda)
+module "lambda" {
+  source = "./modules/lambda"
+
+  project              = var.project
+  region               = var.aws_region
+  account_id           = data.aws_caller_identity.current.account_id
+  smtp_host            = var.smtp_host
+  smtp_port            = var.smtp_port
+  smtp_user            = var.smtp_user
+  smtp_password        = var.smtp_password
+  default_from_email   = var.default_from_email
+  email_subject_prefix = var.email_subject_prefix
 }
 
 # Compute Module (ECS, Fargate)

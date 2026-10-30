@@ -103,6 +103,47 @@ resource "aws_vpc_endpoint" "s3" {
   }
 }
 
+# -----------------------------------------------------------------------------
+# Interface VPC Endpoint for Lambda (Enables Private ECS to Invoke Lambda)
+# -----------------------------------------------------------------------------
+resource "aws_security_group" "lambda_vpce" {
+  name        = "${var.project}-lambda-vpce-sg"
+  description = "Security group for Lambda Interface VPC Endpoint"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "HTTPS from ECS Tasks"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [var.ecs_security_group_id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project}-lambda-vpce-sg"
+  }
+}
+
+resource "aws_vpc_endpoint" "lambda" {
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.lambda"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private[*].id
+  security_group_ids  = [aws_security_group.lambda_vpce.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name = "${var.project}-vpce-lambda"
+  }
+}
+
 data "aws_region" "current" {}
 
 # Application Load Balancer

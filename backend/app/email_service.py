@@ -230,6 +230,35 @@ def _send_smtp(to_email: str, subject: str, plain_text: str, html_content: str):
         server.sendmail(settings.DEFAULT_FROM_EMAIL, [to_email], msg.as_string())
 
 
+def _send_lambda(to_email: str, subject: str, plain_text: str, html_content: str):
+    """
+    Trigger AWS Lambda function to send email via Google SMTP.
+    Works seamlessly from ECS in Private Subnet via Lambda VPC Interface Endpoint.
+    Falls back to direct SMTP during local docker testing if AWS credentials are not set.
+    """
+    import json
+    payload = {
+        "to_email": to_email,
+        "subject": subject,
+        "plain_text": plain_text,
+        "html_content": html_content,
+    }
+
+    try:
+        lambda_client = boto3.client("lambda", region_name=settings.AWS_REGION)
+        logger.info(f"Triggering Lambda '{settings.EMAIL_LAMBDA_NAME}' for {to_email}...")
+        response = lambda_client.invoke(
+            FunctionName=settings.EMAIL_LAMBDA_NAME,
+            InvocationType="Event",
+            Payload=json.dumps(payload),
+        )
+        logger.info(f"Lambda triggered successfully (HTTP {response.get('StatusCode')})")
+        return response
+    except Exception as exc:
+        logger.warning(f"AWS Lambda invoke failed ({exc}). Falling back to SMTP.")
+        return _send_smtp(to_email, subject, plain_text, html_content)
+
+
 def _record_email_log(
     recipient: str,
     subject: str,
@@ -291,7 +320,10 @@ def send_course_notification(
     email_status = "SENT"
 
     try:
-        if provider == "ses":
+        if provider == "lambda":
+            _send_lambda(to_email, subject, plain_text, html_content)
+            logger.info(f"Lambda email dispatched successfully to {to_email}")
+        elif provider == "ses":
             _send_ses(to_email, subject, plain_text, html_content)
             logger.info(f"SES email sent successfully to {to_email}")
         elif provider == "smtp":

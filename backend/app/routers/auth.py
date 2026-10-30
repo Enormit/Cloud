@@ -9,7 +9,7 @@ from app.auth import (
     get_current_user,
     verify_password,
 )
-from app.schemas import TokenResponse, UserLogin, UserOut
+from app.schemas import TokenResponse, UserLogin, UserOut, UserProfileUpdate
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -94,7 +94,7 @@ async def update_my_profile(
     Cập nhật thông tin cá nhân của người dùng hiện tại (Email, họ tên, số điện thoại, địa chỉ).
     Bảo vệ các thông tin quan trọng không được phép tự sửa: ID, MSSV, Username, Quyền hạn (is_staff/is_superuser/is_active), Chuyên ngành/Major.
     """
-    from app.database import get_table, to_dynamo
+    from app.database import get_table, to_dynamo, to_native
     table = get_table("accounts_user")
     user_id = int(current_user["id"])
 

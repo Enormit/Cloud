@@ -88,7 +88,8 @@ class Settings(BaseSettings):
     USE_LOCAL_DYNAMODB: bool = _str_to_bool(os.getenv("USE_LOCAL_DYNAMODB", "false"))
 
     # Email Service
-    EMAIL_PROVIDER: str = os.getenv("EMAIL_PROVIDER", "mock").lower()  # ses | smtp | console | mock
+    EMAIL_PROVIDER: str = os.getenv("EMAIL_PROVIDER", "mock").lower()  # lambda | ses | smtp | console | mock
+    EMAIL_LAMBDA_NAME: str = os.getenv("EMAIL_LAMBDA_NAME", "course-reg-email-worker")
     DEFAULT_FROM_EMAIL: str = os.getenv("DEFAULT_FROM_EMAIL", "noreply@course-reg.edu.vn")
     EMAIL_SUBJECT_PREFIX: str = os.getenv("EMAIL_SUBJECT_PREFIX", "Đăng Ký Học Phần")
     

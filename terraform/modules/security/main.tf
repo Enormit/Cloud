@@ -273,9 +273,9 @@ resource "aws_iam_role_policy" "dynamodb_access" {
   })
 }
 
-# IAM Policy to allow ECS tasks send email directly via SES
-resource "aws_iam_role_policy" "ses_access" {
-  name = "${var.project}-ses-access"
+# IAM Policy to allow ECS tasks invoke Email Worker Lambda asynchronously
+resource "aws_iam_role_policy" "lambda_invoke" {
+  name = "${var.project}-lambda-invoke-access"
   role = aws_iam_role.ecs_task_role.id
 
   policy = jsonencode({
@@ -284,8 +284,7 @@ resource "aws_iam_role_policy" "ses_access" {
       {
         Effect = "Allow"
         Action = [
-          "ses:SendEmail",
-          "ses:SendRawEmail"
+          "lambda:InvokeFunction"
         ]
         Resource = "*"
       }

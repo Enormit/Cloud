@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth import get_current_staff_user, get_current_user
 from app.config import settings
-from app.email_service import _send_ses, _send_smtp, get_email_logs
+from app.email_service import _send_lambda, _send_ses, _send_smtp, get_email_logs
 from app.schemas import EmailLogOut, TestEmailRequest
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,9 @@ async def send_test_email(
     body = payload.content
 
     try:
-        if provider == "ses":
+        if provider == "lambda":
+            _send_lambda(payload.recipient, subject, body, f"<p>{body}</p>")
+        elif provider == "ses":
             _send_ses(payload.recipient, subject, body, f"<p>{body}</p>")
         elif provider == "smtp":
             _send_smtp(payload.recipient, subject, body, f"<p>{body}</p>")

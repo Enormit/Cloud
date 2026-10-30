@@ -123,6 +123,10 @@ resource "aws_ecs_task_definition" "backend" {
           value = var.email_provider
         },
         {
+          name  = "EMAIL_LAMBDA_NAME"
+          value = "${var.project}-email-worker"
+        },
+        {
           name  = "USE_AWS_SECRETS"
           value = "true"
         },

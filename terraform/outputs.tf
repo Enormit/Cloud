@@ -72,3 +72,14 @@ output "cloudtrail_bucket_name" {
   value       = module.monitoring.cloudtrail_bucket_name
   description = "S3 bucket for CloudTrail logs"
 }
+
+# Lambda Email Worker Outputs
+output "lambda_email_worker_arn" {
+  value       = module.lambda.lambda_arn
+  description = "ARN of Email Worker Lambda function"
+}
+
+output "lambda_email_worker_name" {
+  value       = module.lambda.lambda_function_name
+  description = "Name of Email Worker Lambda function"
+}

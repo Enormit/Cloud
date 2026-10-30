@@ -1,0 +1,5 @@
+smtp_host          = "smtp.gmail.com"
+smtp_port          = "587"
+smtp_user          = "your-email@gmail.com"
+smtp_password      = "your-16-char-app-password"
+default_from_email = "your-email@gmail.com"

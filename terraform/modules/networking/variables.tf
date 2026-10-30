@@ -37,3 +37,8 @@ variable "cloudfront_custom_header_token" {
   description = "Secret token that CloudFront sends in custom header to authenticate with ALB"
   sensitive   = true
 }
+
+variable "ecs_security_group_id" {
+  type        = string
+  description = "Security group ID for ECS Tasks to allow invoking Lambda VPC endpoint"
+}

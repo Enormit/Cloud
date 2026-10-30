@@ -93,8 +93,8 @@ variable "secrets_manager_name" {
 
 variable "email_provider" {
   type        = string
-  default     = "ses"
-  description = "Email provider used by backend (ses or smtp)"
+  default     = "lambda"
+  description = "Email provider used by backend (lambda, ses or smtp)"
 }
 
 variable "ecr_retain_image_count" {

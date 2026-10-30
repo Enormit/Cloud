@@ -92,8 +92,46 @@ variable "log_retention_days" {
 
 variable "email_provider" {
   type        = string
-  default     = "ses"
-  description = "Email provider used by backend (ses or smtp)"
+  default     = "lambda"
+  description = "Email provider used by backend (lambda, ses or smtp)"
+}
+
+# Lambda Google SMTP variables
+variable "smtp_host" {
+  type        = string
+  default     = "smtp.gmail.com"
+  description = "SMTP host (Gmail)"
+}
+
+variable "smtp_port" {
+  type        = string
+  default     = "587"
+  description = "SMTP port"
+}
+
+variable "smtp_user" {
+  type        = string
+  default     = "phamquyet472k4@gmail.com"
+  description = "Gmail address for Lambda email worker"
+}
+
+variable "smtp_password" {
+  type        = string
+  default     = ""
+  sensitive   = true
+  description = "Gmail App Password"
+}
+
+variable "default_from_email" {
+  type        = string
+  default     = "phamquyet472k4@gmail.com"
+  description = "Sender email address"
+}
+
+variable "email_subject_prefix" {
+  type        = string
+  default     = "Đăng Ký Học Phần"
+  description = "Prefix for email subjects"
 }
 
 # Secrets variables
