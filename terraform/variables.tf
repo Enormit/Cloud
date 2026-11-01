@@ -74,7 +74,7 @@ variable "max_capacity" {
 
 variable "target_cpu_utilization" {
   type        = number
-  default     = 70
+  default     = 30
   description = "Target CPU utilization percentage for autoscaling"
 }
 

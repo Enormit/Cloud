@@ -3,9 +3,9 @@ import { check, sleep } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '30s', target: 30 },  // Khởi động tăng lên 30 VUs trong 30s
-    { duration: '3m', target: 70 },   // Đẩy tải cao 70 VUs liên tục trong 3 phút
-    { duration: '30s', target: 0 },   // Hạ tải về 0
+    { duration: '20s', target: 50 },  // Tăng nhanh lên 50 VUs trong 20s
+    { duration: '5m', target: 50 },   // Giữ ổn định 50 VUs liên tục suốt 5 phút
+    { duration: '20s', target: 0 },   // Hạ tải về 0
   ],
   thresholds: {
     http_req_failed: ['rate<0.05'],
@@ -50,6 +50,6 @@ export default function (data) {
     'stats status is 200': (r) => r.status === 200,
   });
 
-  // Nghỉ nhẹ 20ms giữa các request để duy trì tải liên tục
-  sleep(0.02);
+  // Nghỉ 40ms giữa các request để duy trì tải đều đặn và mượt mà
+  sleep(0.04);
 }
