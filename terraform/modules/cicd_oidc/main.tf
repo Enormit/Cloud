@@ -44,12 +44,12 @@ resource "aws_iam_role" "github_actions" {
           }
           StringLike = {
             "token.actions.githubusercontent.com:sub" = [
-              "repo:${var.github_org}/${var.github_repo}:*",
-              "repo:${lower(var.github_org)}/${var.github_repo}:*",
-              "repo:${lower(var.github_org)}/${lower(var.github_repo)}:*",
-              "repo:${var.github_org}/${lower(var.github_repo)}:*",
-              "repo:*:Cloud:*",
-              "repo:*:cloud:*"
+              "repo:Enormit*/Cloud*:*",
+              "repo:enormit*/Cloud*:*",
+              "repo:enormit*/cloud*:*",
+              "repo:Enormit*/cloud*:*",
+              "repo:*Cloud*:*",
+              "repo:*cloud*:*"
             ]
           }
         }
