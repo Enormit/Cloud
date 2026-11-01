@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { GraduationCap, Lock, User, ArrowRight, ShieldCheck, Mail, Database, Cloud } from "lucide-react";
+import {
+  GraduationCap,
+  Lock,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  Database,
+  Cloud,
+  Cpu,
+  Mail,
+  AlertCircle,
+} from "lucide-react";
 import { api, setToken, setUser } from "../api";
 
 export default function LoginPage({ onLoginSuccess }) {
@@ -18,7 +29,7 @@ export default function LoginPage({ onLoginSuccess }) {
       setUser(data.user);
       onLoginSuccess(data.user);
     } catch (err) {
-      setError(err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+      setError(err.message || "Tài khoản hoặc mật khẩu không chính xác.");
     } finally {
       setLoading(false);
     }
@@ -45,33 +56,50 @@ export default function LoginPage({ onLoginSuccess }) {
           width: "100%",
           maxWidth: "460px",
           padding: "36px 32px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+          background: "var(--bg-surface)",
+          border: "1px solid var(--border-medium)",
+          borderRadius: "16px",
+          boxShadow: "var(--shadow-lg)",
         }}
       >
         {/* Brand Header */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
           <div
             style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "16px",
-              background: "linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)",
+              width: "56px",
+              height: "56px",
+              borderRadius: "14px",
+              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#fff",
-              marginBottom: "16px",
-              boxShadow: "0 8px 24px rgba(99, 102, 241, 0.4)",
+              color: "#ffffff",
+              marginBottom: "14px",
+              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
             }}
           >
-            <GraduationCap size={34} />
+            <GraduationCap size={30} />
           </div>
 
-          <h1 style={{ fontSize: "22px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px" }}>
-            Đăng Nhập Cổng Đào Tạo
+          <h1
+            style={{
+              fontSize: "21px",
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.3px",
+            }}
+          >
+            Cổng Đăng Ký Học Phần
           </h1>
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "6px" }}>
-            Hệ thống Đăng ký Môn học Sinh viên &bull; AWS Cloud Architecture
+          <p
+            style={{
+              fontSize: "13px",
+              color: "var(--text-secondary)",
+              marginTop: "5px",
+            }}
+          >
+            Hệ thống đào tạo tín chỉ đại học trực tuyến
           </p>
         </div>
 
@@ -79,18 +107,19 @@ export default function LoginPage({ onLoginSuccess }) {
         {error && (
           <div
             style={{
-              background: "rgba(239, 68, 68, 0.15)",
-              border: "1px solid rgba(239, 68, 68, 0.4)",
-              borderRadius: "10px",
-              padding: "12px",
-              color: "#fca5a5",
+              background: "var(--danger-subtle)",
+              border: "1px solid var(--danger-border)",
+              borderRadius: "8px",
+              padding: "11px 14px",
+              color: "#fda4af",
               fontSize: "13px",
-              marginBottom: "20px",
+              marginBottom: "18px",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "10px",
             }}
           >
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
@@ -98,39 +127,73 @@ export default function LoginPage({ onLoginSuccess }) {
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <div>
-            <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>
-              Tên đăng nhập hoặc MSSV:
+            <label
+              style={{
+                display: "block",
+                fontSize: "12.5px",
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                marginBottom: "6px",
+              }}
+            >
+              Mã số sinh viên (MSSV) / Tài khoản
             </label>
             <div style={{ position: "relative" }}>
-              <User size={18} style={{ position: "absolute", left: "14px", top: "12px", color: "var(--text-muted)" }} />
+              <User
+                size={16}
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--text-muted)",
+                }}
+              />
               <input
-                id="login-username-input"
+                id="login-username"
                 type="text"
-                required
-                placeholder="Nhập mã sinh viên (vd: 21000101) hoặc sv001..."
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ví dụ: sv001 hoặc 21000101"
                 className="input-control"
-                style={{ paddingLeft: "42px" }}
+                style={{ paddingLeft: "38px" }}
+                required
               />
             </div>
           </div>
 
           <div>
-            <label style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px", display: "block" }}>
-              Mật khẩu:
+            <label
+              style={{
+                display: "block",
+                fontSize: "12.5px",
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                marginBottom: "6px",
+              }}
+            >
+              Mật khẩu
             </label>
             <div style={{ position: "relative" }}>
-              <Lock size={18} style={{ position: "absolute", left: "14px", top: "12px", color: "var(--text-muted)" }} />
+              <Lock
+                size={16}
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--text-muted)",
+                }}
+              />
               <input
-                id="login-password-input"
+                id="login-password"
                 type="password"
-                required
-                placeholder="Nhập mật khẩu..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Nhập mật khẩu của bạn"
                 className="input-control"
-                style={{ paddingLeft: "42px" }}
+                style={{ paddingLeft: "38px" }}
+                required
               />
             </div>
           </div>
@@ -140,72 +203,110 @@ export default function LoginPage({ onLoginSuccess }) {
             type="submit"
             disabled={loading}
             className="btn btn-primary"
-            style={{ width: "100%", padding: "12px", marginTop: "8px", fontSize: "15px" }}
+            style={{ width: "100%", padding: "10px", marginTop: "4px" }}
           >
-            {loading ? "Đang xác thực..." : "Đăng Nhập"}
-            <ArrowRight size={18} />
+            {loading ? (
+              <span>Đang xác thực...</span>
+            ) : (
+              <>
+                <span>Đăng Nhập Hệ Thống</span>
+                <ArrowRight size={16} />
+              </>
+            )}
           </button>
         </form>
 
-        {/* Quick Demo Accounts Selection */}
-        <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--border-color)" }}>
-          <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "10px", textAlign: "center" }}>
-            Hoặc chọn nhanh tài khoản thử nghiệm:
+        {/* Quick Demo Access Section */}
+        <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--border-subtle)" }}>
+          <div
+            style={{
+              fontSize: "11.5px",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              color: "var(--text-muted)",
+              marginBottom: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <ShieldCheck size={14} style={{ color: "var(--primary)" }} />
+            <span>Tài khoản thử nghiệm nhanh (1-Click)</span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <button
               type="button"
+              id="demo-student-1"
               onClick={() => handleQuickLogin("sv001", "student123")}
               className="btn btn-secondary"
-              style={{ padding: "8px", fontSize: "12px", textAlign: "left", display: "block" }}
+              style={{
+                justifyContent: "space-between",
+                padding: "8px 12px",
+                fontSize: "12.5px",
+                textAlign: "left",
+              }}
             >
-              <div style={{ fontWeight: 700, color: "#38bdf8" }}>sv001 (Sinh viên 1)</div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>MSSV: 21000101</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span className="badge badge-primary" style={{ padding: "1px 6px" }}>SV</span>
+                <span style={{ fontWeight: 600 }}>Nguyễn Văn An</span>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: "11px", fontVariantNumeric: "tabular-nums" }}>
+                sv001 / student123
+              </span>
             </button>
 
             <button
               type="button"
-              onClick={() => handleQuickLogin("sv002", "student123")}
-              className="btn btn-secondary"
-              style={{ padding: "8px", fontSize: "12px", textAlign: "left", display: "block" }}
-            >
-              <div style={{ fontWeight: 700, color: "#34d399" }}>sv002 (Sinh viên 2)</div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>MSSV: 21000102</div>
-            </button>
-
-            <button
-              type="button"
+              id="demo-admin"
               onClick={() => handleQuickLogin("admin", "admin123")}
               className="btn btn-secondary"
-              style={{ padding: "8px", fontSize: "12px", textAlign: "left", gridColumn: "span 2", borderColor: "rgba(245, 158, 11, 0.3)" }}
+              style={{
+                justifyContent: "space-between",
+                padding: "8px 12px",
+                fontSize: "12.5px",
+                textAlign: "left",
+                borderColor: "rgba(245, 158, 11, 0.25)",
+              }}
             >
-              <div style={{ fontWeight: 700, color: "#fbbf24" }}>admin (Quản trị viên)</div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>Toàn quyền cấu hình & gửi email test</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span className="badge badge-warning" style={{ padding: "1px 6px" }}>ADMIN</span>
+                <span style={{ fontWeight: 600 }}>Ban Quản Trị Đào Tạo</span>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: "11px", fontVariantNumeric: "tabular-nums" }}>
+                admin / admin123
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Tech Badges Footer */}
+        {/* Cloud Infrastructure Proof Badges */}
         <div
           style={{
-            marginTop: "24px",
+            marginTop: "20px",
             display: "flex",
+            alignItems: "center",
             justifyContent: "center",
-            gap: "12px",
+            gap: "14px",
             fontSize: "11px",
             color: "var(--text-muted)",
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <Cloud size={13} color="#38bdf8" /> AWS Cloud
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <Database size={13} color="#a78bfa" /> DynamoDB
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <Mail size={13} color="#f472b6" /> SES / SMTP
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <Cloud size={13} style={{ color: "#38bdf8" }} />
+            <span>AWS Fargate</span>
+          </div>
+          <span>&bull;</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <Database size={13} style={{ color: "#a855f7" }} />
+            <span>DynamoDB</span>
+          </div>
+          <span>&bull;</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <Cpu size={13} style={{ color: "#f97316" }} />
+            <span>Lambda Async</span>
+          </div>
         </div>
       </div>
     </div>

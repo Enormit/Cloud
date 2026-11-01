@@ -1,29 +1,46 @@
 import React from "react";
-import { Printer, CalendarDays, MapPin, User, Clock } from "lucide-react";
+import {
+  Printer,
+  CalendarDays,
+  MapPin,
+  User,
+  Clock,
+  BookOpen,
+  Sparkles,
+} from "lucide-react";
 
-const DAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-const PERIODS = [
-  { p: 1, time: "07:00 - 07:50" },
-  { p: 2, time: "07:55 - 08:45" },
-  { p: 3, time: "08:50 - 09:40" },
-  { p: 4, time: "09:50 - 10:40" },
-  { p: 5, time: "10:45 - 11:35" },
-  { p: 6, time: "11:40 - 12:30" },
-  { p: 7, time: "13:00 - 13:50" },
-  { p: 8, time: "13:55 - 14:45" },
-  { p: 9, time: "14:50 - 15:40" },
-  { p: 10, time: "15:50 - 16:40" },
-  { p: 11, time: "16:45 - 17:35" },
-  { p: 12, time: "17:40 - 18:30" },
+const DAYS = [
+  { key: "Thứ 2", label: "Thứ Hai", dayIdx: 1 },
+  { key: "Thứ 3", label: "Thứ Ba", dayIdx: 2 },
+  { key: "Thứ 4", label: "Thứ Tư", dayIdx: 3 },
+  { key: "Thứ 5", label: "Thứ Năm", dayIdx: 4 },
+  { key: "Thứ 6", label: "Thứ Sáu", dayIdx: 5 },
+  { key: "Thứ 7", label: "Thứ Bảy", dayIdx: 6 },
+  { key: "Chủ nhật", label: "Chủ Nhật", dayIdx: 0 },
 ];
 
-const COLORS = [
-  { bg: "rgba(99, 102, 241, 0.18)", border: "#6366f1", text: "#a5b4fc" },
-  { bg: "rgba(6, 182, 212, 0.18)", border: "#06b6d4", text: "#67e8f9" },
-  { bg: "rgba(16, 185, 129, 0.18)", border: "#10b981", text: "#6ee7b7" },
-  { bg: "rgba(245, 158, 11, 0.18)", border: "#f59e0b", text: "#fcd34d" },
-  { bg: "rgba(236, 72, 153, 0.18)", border: "#ec4899", text: "#f472b6" },
-  { bg: "rgba(139, 92, 246, 0.18)", border: "#8b5cf6", text: "#c4b5fd" },
+const PERIODS = [
+  { p: 1, time: "07:00 - 07:50", session: "Sáng" },
+  { p: 2, time: "07:55 - 08:45", session: "Sáng" },
+  { p: 3, time: "08:50 - 09:40", session: "Sáng" },
+  { p: 4, time: "09:50 - 10:40", session: "Sáng" },
+  { p: 5, time: "10:45 - 11:35", session: "Sáng" },
+  { p: 6, time: "13:00 - 13:50", session: "Chiều" },
+  { p: 7, time: "13:55 - 14:45", session: "Chiều" },
+  { p: 8, time: "14:50 - 15:40", session: "Chiều" },
+  { p: 9, time: "15:50 - 16:40", session: "Chiều" },
+  { p: 10, time: "16:45 - 17:35", session: "Chiều" },
+  { p: 11, time: "17:40 - 18:30", session: "Tối" },
+  { p: 12, time: "18:35 - 19:25", session: "Tối" },
+];
+
+const PALETTES = [
+  { bg: "rgba(59, 130, 246, 0.14)", border: "rgba(59, 130, 246, 0.35)", text: "#93c5fd", badge: "#1d4ed8" },
+  { bg: "rgba(6, 182, 212, 0.14)", border: "rgba(6, 182, 212, 0.35)", text: "#67e8f9", badge: "#0e7490" },
+  { bg: "rgba(16, 185, 129, 0.14)", border: "rgba(16, 185, 129, 0.35)", text: "#6ee7b7", badge: "#047857" },
+  { bg: "rgba(245, 158, 11, 0.14)", border: "rgba(245, 158, 11, 0.35)", text: "#fcd34d", badge: "#b45309" },
+  { bg: "rgba(139, 92, 246, 0.14)", border: "rgba(139, 92, 246, 0.35)", text: "#c4b5fd", badge: "#6d28d9" },
+  { bg: "rgba(236, 72, 153, 0.14)", border: "rgba(236, 72, 153, 0.35)", text: "#f472b6", badge: "#be185d" },
 ];
 
 function parsePeriods(str) {
@@ -41,16 +58,23 @@ function parsePeriods(str) {
 }
 
 export default function Timetable({ registeredCourses = [], onSelectCourse }) {
-  // Map courses to colors
+  const currentDayIdx = new Date().getDay();
+
+  // Map each course code to a stable palette
   const courseColorMap = {};
   registeredCourses.forEach((c, idx) => {
-    courseColorMap[c.code] = COLORS[idx % COLORS.length];
+    courseColorMap[c.code] = PALETTES[idx % PALETTES.length];
   });
 
-  // Find course for a given day and period
-  const getCourseForSlot = (day, period) => {
+  // Calculate total periods per week
+  const totalWeeklyPeriods = registeredCourses.reduce((acc, c) => {
+    return acc + parsePeriods(c.schedule_periods).length;
+  }, 0);
+
+  // Helper to find course at a slot
+  const getCourseForSlot = (dayKey, period) => {
     return registeredCourses.find((c) => {
-      if (c.schedule_day !== day) return false;
+      if (c.schedule_day !== dayKey) return false;
       const periods = parsePeriods(c.schedule_periods);
       return periods.includes(period);
     });
@@ -62,7 +86,7 @@ export default function Timetable({ registeredCourses = [], onSelectCourse }) {
 
   return (
     <div className="glass-panel" style={{ padding: "24px" }}>
-      {/* Header */}
+      {/* Header Toolbar */}
       <div
         style={{
           display: "flex",
@@ -70,206 +94,313 @@ export default function Timetable({ registeredCourses = [], onSelectCourse }) {
           justifyContent: "space-between",
           marginBottom: "20px",
           flexWrap: "wrap",
-          gap: "12px",
+          gap: "14px",
+          paddingBottom: "16px",
+          borderBottom: "1px solid var(--border-subtle)",
         }}
       >
         <div>
-          <h2
-            style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <CalendarDays size={20} color="#38bdf8" />
-            Thời Khóa Biểu Tuần Học - Học Kỳ I (2026-2027)
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <CalendarDays size={20} style={{ color: "var(--primary)" }} />
+            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)" }}>
+              Thời Khóa Biểu Tuần Học
+            </h2>
+            <span className="badge badge-primary">Học Kỳ I (2026-2027)</span>
+          </div>
           <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "4px" }}>
-            Lịch học chính thức dựa trên các học phần bạn đã đăng ký thành công.
+            Trực quan hóa lịch học tự động từ các môn học đã đăng ký thành công.
           </p>
         </div>
 
-        <button
-          id="print-timetable-btn"
-          onClick={handlePrint}
-          className="btn btn-secondary"
-          style={{ fontSize: "13px" }}
-        >
-          <Printer size={16} />
-          In thời khóa biểu
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              background: "var(--bg-surface-subtle)",
+              padding: "6px 12px",
+              borderRadius: "8px",
+              border: "1px solid var(--border-subtle)",
+              fontSize: "12.5px",
+            }}
+          >
+            <span>
+              Số môn: <strong style={{ color: "var(--text-primary)" }}>{registeredCourses.length}</strong>
+            </span>
+            <span style={{ color: "var(--border-medium)" }}>|</span>
+            <span>
+              Tổng tiết: <strong style={{ color: "var(--primary)" }}>{totalWeeklyPeriods}</strong> tiết/tuần
+            </span>
+          </div>
+
+          <button
+            id="print-timetable-btn"
+            onClick={handlePrint}
+            className="btn btn-secondary"
+            style={{ fontSize: "13px", padding: "7px 13px" }}
+            title="In thời khóa biểu"
+          >
+            <Printer size={15} />
+            <span>In Lịch Học</span>
+          </button>
+        </div>
       </div>
 
+      {/* Empty State */}
       {registeredCourses.length === 0 ? (
         <div
           style={{
-            textAlign: "center",
             padding: "60px 20px",
-            color: "var(--text-muted)",
+            textAlign: "center",
+            background: "var(--bg-surface-subtle)",
+            borderRadius: "12px",
+            border: "1px dashed var(--border-medium)",
           }}
         >
-          <Clock size={48} style={{ opacity: 0.3, marginBottom: "12px" }} />
-          <h4 style={{ fontSize: "16px", color: "#e2e8f0", marginBottom: "6px" }}>
-            Chưa có môn học nào trong Thời khóa biểu
-          </h4>
-          <p style={{ fontSize: "13px" }}>
-            Vui lòng chuyển qua tab "Đăng ký học phần" để chọn các môn học cho học kỳ này.
+          <div
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "12px",
+              background: "var(--primary-subtle)",
+              color: "var(--primary)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "14px",
+            }}
+          >
+            <BookOpen size={24} />
+          </div>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>
+            Chưa có môn học nào trong thời khóa biểu
+          </h3>
+          <p style={{ fontSize: "13.5px", color: "var(--text-muted)", maxWidth: "420px", margin: "6px auto 0" }}>
+            Vui lòng chọn tab <strong>"Môn Học Mở"</strong> để đăng ký các học phần của kỳ này. Lịch học sẽ được cập nhật tự động ngay khi đăng ký.
           </p>
         </div>
       ) : (
+        /* Weekly Timetable Table Grid */
         <div style={{ overflowX: "auto" }}>
           <table
             style={{
               width: "100%",
-              minWidth: "850px",
+              minWidth: "860px",
               borderCollapse: "separate",
-              borderSpacing: "4px",
-              fontSize: "12px",
+              borderSpacing: "0",
+              fontSize: "12.5px",
             }}
           >
             <thead>
               <tr>
                 <th
                   style={{
-                    padding: "10px",
-                    background: "rgba(0, 0, 0, 0.4)",
+                    width: "120px",
+                    padding: "10px 12px",
+                    background: "var(--bg-surface-elevated)",
                     color: "var(--text-secondary)",
-                    borderRadius: "8px",
-                    width: "100px",
+                    fontWeight: 700,
+                    textAlign: "center",
+                    borderBottom: "1px solid var(--border-medium)",
+                    borderTopLeftRadius: "8px",
                   }}
                 >
-                  Tiết / Giờ
+                  Tiết / Buổi
                 </th>
-                {DAYS.map((d) => (
-                  <th
-                    key={d}
-                    style={{
-                      padding: "10px",
-                      background: "rgba(99, 102, 241, 0.12)",
-                      color: "#e2e8f0",
-                      fontWeight: 700,
-                      borderRadius: "8px",
-                    }}
-                  >
-                    {d}
-                  </th>
-                ))}
+                {DAYS.map((d, index) => {
+                  const isToday = d.dayIdx === currentDayIdx;
+                  return (
+                    <th
+                      key={d.key}
+                      style={{
+                        padding: "10px 12px",
+                        background: isToday ? "rgba(59, 130, 246, 0.12)" : "var(--bg-surface-elevated)",
+                        color: isToday ? "#60a5fa" : "var(--text-primary)",
+                        fontWeight: 700,
+                        textAlign: "center",
+                        borderBottom: "1px solid var(--border-medium)",
+                        borderLeft: "1px solid var(--border-subtle)",
+                        borderTopRightRadius: index === DAYS.length - 1 ? "8px" : "0",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                        <span>{d.label}</span>
+                        {isToday && (
+                          <span
+                            style={{
+                              fontSize: "9.5px",
+                              padding: "1px 5px",
+                              background: "var(--primary)",
+                              color: "#fff",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            Hôm nay
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
-              {PERIODS.map(({ p, time }) => (
-                <tr key={p}>
-                  {/* Period Time Cell */}
-                  <td
-                    style={{
-                      padding: "8px",
-                      background: "rgba(0, 0, 0, 0.2)",
-                      borderRadius: "6px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div style={{ fontWeight: 700, color: "#fff" }}>Tiết {p}</div>
-                    <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-                      {time}
-                    </div>
-                  </td>
-
-                  {/* Days */}
-                  {DAYS.map((day) => {
-                    const c = getCourseForSlot(day, p);
-                    if (!c) {
-                      return (
+              {PERIODS.map((periodObj, pIdx) => {
+                const isAfternoonStart = periodObj.p === 6;
+                return (
+                  <React.Fragment key={periodObj.p}>
+                    {/* Lunch Break Divider */}
+                    {isAfternoonStart && (
+                      <tr style={{ background: "rgba(0, 0, 0, 0.25)" }}>
                         <td
-                          key={day}
+                          colSpan={DAYS.length + 1}
                           style={{
-                            padding: "6px",
-                            background: "rgba(255, 255, 255, 0.02)",
-                            borderRadius: "6px",
+                            padding: "6px 16px",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
+                            color: "var(--text-muted)",
+                            textAlign: "center",
+                            borderTop: "1px solid var(--border-medium)",
+                            borderBottom: "1px solid var(--border-medium)",
                           }}
-                        />
-                      );
-                    }
-
-                    const periods = parsePeriods(c.schedule_periods);
-                    const isFirstPeriod = periods[0] === p;
-                    const color = courseColorMap[c.code] || COLORS[0];
-
-                    return (
+                        >
+                          &bull; Nghỉ Trưa (11:35 - 13:00) &bull;
+                        </td>
+                      </tr>
+                    )}
+                    <tr>
+                      {/* Period Time Column */}
                       <td
-                        key={day}
-                        onClick={() => onSelectCourse && onSelectCourse(c)}
                         style={{
-                          padding: "8px",
-                          background: color.bg,
-                          borderLeft: `3px solid ${color.border}`,
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          transition: "transform 0.15s ease",
+                          padding: "8px 10px",
+                          textAlign: "center",
+                          background: "var(--bg-surface-subtle)",
+                          borderBottom: "1px solid var(--border-subtle)",
+                          color: "var(--text-secondary)",
                         }}
                       >
-                        {isFirstPeriod ? (
-                          <div>
-                            <div
+                        <div style={{ fontWeight: 700, fontSize: "12px", color: "var(--text-primary)" }}>
+                          Tiết {periodObj.p}
+                        </div>
+                        <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+                          {periodObj.time}
+                        </div>
+                      </td>
+
+                      {/* Day Cells */}
+                      {DAYS.map((d) => {
+                        const course = getCourseForSlot(d.key, periodObj.p);
+                        const isToday = d.dayIdx === currentDayIdx;
+
+                        if (!course) {
+                          return (
+                            <td
+                              key={d.key}
                               style={{
-                                fontWeight: 700,
-                                color: color.text,
-                                fontSize: "12px",
-                                display: "flex",
-                                justifyContent: "space-between",
+                                padding: "6px",
+                                borderBottom: "1px solid var(--border-subtle)",
+                                borderLeft: "1px solid var(--border-subtle)",
+                                background: isToday ? "rgba(59, 130, 246, 0.02)" : "transparent",
                               }}
-                            >
-                              <span>{c.code}</span>
-                              <span style={{ fontSize: "10px", opacity: 0.8 }}>
-                                {c.credits} TC
-                              </span>
-                            </div>
-                            <div
-                              style={{
-                                color: "#ffffff",
-                                fontWeight: 600,
-                                margin: "2px 0 4px 0",
-                                fontSize: "12px",
-                              }}
-                            >
-                              {c.name}
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                color: "var(--text-secondary)",
-                                fontSize: "11px",
-                              }}
-                            >
-                              <MapPin size={11} color="#f472b6" />
-                              <span>{c.room}</span>
-                              <span style={{ margin: "0 2px" }}>&bull;</span>
-                              <User size={11} color="#a78bfa" />
-                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                {c.instructor}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
+                            />
+                          );
+                        }
+
+                        const periods = parsePeriods(course.schedule_periods);
+                        const isFirstPeriod = periods[0] === periodObj.p;
+                        const palette = courseColorMap[course.code] || PALETTES[0];
+
+                        return (
+                          <td
+                            key={d.key}
                             style={{
-                              color: color.text,
-                              fontSize: "11px",
-                              opacity: 0.7,
-                              fontWeight: 600,
+                              padding: "4px",
+                              borderBottom: "1px solid var(--border-subtle)",
+                              borderLeft: "1px solid var(--border-subtle)",
+                              background: isToday ? "rgba(59, 130, 246, 0.04)" : "transparent",
+                              verticalAlign: "top",
                             }}
                           >
-                            &bull; {c.code} ({c.room})
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+                            <div
+                              onClick={() => onSelectCourse && onSelectCourse(course)}
+                              style={{
+                                padding: "8px 10px",
+                                background: palette.bg,
+                                border: `1px solid ${palette.border}`,
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                transition: "all 0.15s ease",
+                              }}
+                              title={`Bấm để xem chi tiết ${course.name}`}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  gap: "4px",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontFamily: "var(--font-mono)",
+                                    fontWeight: 700,
+                                    fontSize: "11px",
+                                    color: palette.text,
+                                  }}
+                                >
+                                  {course.code}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: "10.5px",
+                                    padding: "1px 5px",
+                                    background: "rgba(0, 0, 0, 0.2)",
+                                    borderRadius: "4px",
+                                    color: palette.text,
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  {course.credits} TC
+                                </span>
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  fontWeight: 600,
+                                  color: "#ffffff",
+                                  lineHeight: 1.3,
+                                  marginBottom: "6px",
+                                }}
+                              >
+                                {course.name}
+                              </div>
+
+                              <div style={{ display: "flex", flexDirection: "column", gap: "2px", fontSize: "11px", color: palette.text }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                  <MapPin size={11} style={{ flexShrink: 0 }} />
+                                  <span>{course.room || "P.A101"}</span>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                  <User size={11} style={{ flexShrink: 0 }} />
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {course.instructor || "Giảng viên"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

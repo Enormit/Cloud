@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   Search,
   Filter,
-  Clock,
   AlertCircle,
   CheckCircle2,
   BookOpen,
-  Calendar,
-  Award,
   RefreshCw,
   BellRing,
+  X,
+  Layers,
+  GraduationCap,
 } from "lucide-react";
 import { api } from "../api";
 import Navbar from "../components/Navbar";
@@ -141,41 +141,43 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
       />
 
       {/* Main Container */}
-      <main style={{ maxWidth: "1440px", margin: "0 auto", width: "100%", padding: "24px", flex: 1 }}>
-        {/* Registration Window Live Alert Banner */}
+      <main style={{ maxWidth: "1480px", margin: "0 auto", width: "100%", padding: "20px 24px", flex: 1 }}>
+        {/* Registration Window Live Alert Banner (Refined without banned 4px border-left) */}
         <div
           className="glass-panel"
           style={{
-            padding: "16px 20px",
-            marginBottom: "24px",
+            padding: "14px 18px",
+            marginBottom: "20px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "12px",
-            borderLeft: windowInfo?.is_open ? "4px solid var(--success)" : "4px solid var(--danger)",
             background: windowInfo?.is_open
-              ? "linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%)"
-              : "rgba(239, 68, 68, 0.1)",
+              ? "rgba(16, 185, 129, 0.05)"
+              : "rgba(244, 63, 94, 0.05)",
+            borderColor: windowInfo?.is_open
+              ? "var(--success-border)"
+              : "var(--danger-border)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             {windowInfo?.is_open ? (
               <span className="pulse-indicator" />
             ) : (
-              <AlertCircle size={20} color="#f87171" />
+              <AlertCircle size={18} style={{ color: "var(--danger)" }} />
             )}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <strong style={{ fontSize: "14px", color: "#fff" }}>
+                <strong style={{ fontSize: "13.5px", color: "var(--text-primary)" }}>
                   {windowInfo?.name || "Đợt Đăng Ký Học Kỳ I (2026-2027)"}
                 </strong>
                 <span className={`badge ${windowInfo?.is_open ? "badge-success" : "badge-danger"}`}>
-                  {windowInfo?.is_open ? "Đang mở đăng ký" : "Đã đóng cổng"}
+                  {windowInfo?.is_open ? "Cổng Đang Mở" : "Cổng Đã Đóng"}
                 </span>
               </div>
               <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
-                {windowInfo?.message || "Sinh viên đăng ký và nhận email xác nhận tức thì qua AWS SES."}
+                {windowInfo?.message || "Sinh viên đăng ký và nhận thư điện tử xác nhận tức thì qua Google Mail (Serverless Lambda)."}
               </div>
             </div>
           </div>
@@ -185,11 +187,11 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
               onClick={loadAllData}
               disabled={loadingData}
               className="btn btn-secondary"
-              style={{ padding: "6px 12px", fontSize: "12px" }}
+              style={{ padding: "6px 12px", fontSize: "12.5px" }}
               title="Tải lại dữ liệu hệ thống"
             >
               <RefreshCw size={13} className={loadingData ? "spin" : ""} />
-              Làm mới
+              <span>Cập nhật</span>
             </button>
           </div>
         </div>
@@ -202,69 +204,169 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
               className="glass-panel"
               style={{
                 padding: "16px 20px",
-                marginBottom: "24px",
+                marginBottom: "20px",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: "16px",
+                flexDirection: "column",
+                gap: "14px",
               }}
             >
-              {/* Search Box */}
-              <form
-                onSubmit={handleSearchSubmit}
+              {/* Row 1: Search Box & Department Dropdown */}
+              <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
-                  flex: 1,
-                  maxWidth: "460px",
-                  position: "relative",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "14px",
                 }}
               >
-                <Search size={18} style={{ position: "absolute", left: "14px", color: "var(--text-muted)" }} />
-                <input
-                  id="course-search-input"
-                  type="text"
-                  placeholder="Tìm theo mã môn, tên môn hoặc tên giảng viên..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="input-control"
-                  style={{ paddingLeft: "42px" }}
-                />
-                <button type="submit" className="btn btn-primary" style={{ padding: "9px 16px" }}>
-                  Tìm kiếm
-                </button>
-              </form>
-
-              {/* Department Filter */}
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <Filter size={16} color="var(--text-muted)" />
-                <select
-                  id="department-filter-select"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value === "Tất cả các khoa" ? "" : e.target.value)}
-                  className="input-control"
-                  style={{ minWidth: "190px" }}
+                {/* Search Box */}
+                <form
+                  onSubmit={handleSearchSubmit}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    flex: 1,
+                    maxWidth: "520px",
+                    position: "relative",
+                  }}
                 >
-                  {departmentsList.map((d) => (
-                    <option key={d} value={d}>
+                  <Search size={16} style={{ position: "absolute", left: "12px", color: "var(--text-muted)" }} />
+                  <input
+                    id="course-search-input"
+                    type="text"
+                    placeholder="Tìm theo mã môn (COMP1024), tên môn học hoặc giảng viên..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="input-control"
+                    style={{ paddingLeft: "36px", paddingRight: search ? "32px" : "12px" }}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch("");
+                        api.getCourses("", department).then(setCourses);
+                      }}
+                      style={{
+                        position: "absolute",
+                        right: "95px",
+                        background: "transparent",
+                        border: "none",
+                        color: "var(--text-muted)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                  <button type="submit" className="btn btn-primary" style={{ padding: "8px 16px" }}>
+                    Tìm kiếm
+                  </button>
+                </form>
+
+                {/* Department Dropdown */}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Filter size={15} style={{ color: "var(--text-muted)" }} />
+                  <select
+                    id="department-filter-select"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value === "Tất cả các khoa" ? "" : e.target.value)}
+                    className="input-control"
+                    style={{ minWidth: "190px" }}
+                  >
+                    {departmentsList.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Department Quick Filter Pills */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  overflowX: "auto",
+                  paddingBottom: "2px",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, flexShrink: 0 }}>
+                  Khoa / Chuyên ngành:
+                </span>
+                {departmentsList.map((d) => {
+                  const isSelected = (department === "" && d === "Tất cả các khoa") || department === d;
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDepartment(d === "Tất cả các khoa" ? "" : d)}
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        padding: "3px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "all 0.15s ease",
+                        background: isSelected ? "var(--primary)" : "var(--bg-surface-subtle)",
+                        color: isSelected ? "#ffffff" : "var(--text-secondary)",
+                        borderColor: isSelected ? "var(--primary)" : "var(--border-subtle)",
+                      }}
+                    >
                       {d}
-                    </option>
-                  ))}
-                </select>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Total Results Summary */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "14px",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+              }}
+            >
+              <div>
+                Hiển thị <strong style={{ color: "var(--text-primary)" }}>{courses.length}</strong> học phần mở
+                {department && <span> thuộc <em>{department}</em></span>}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--success)" }} />
+                  Đã đăng ký ({registrations.length})
+                </span>
               </div>
             </div>
 
             {/* Course Grid */}
             {courses.length === 0 ? (
-              <div className="glass-panel" style={{ padding: "60px 20px", textAlign: "center", color: "var(--text-muted)" }}>
-                <BookOpen size={48} style={{ opacity: 0.3, marginBottom: "12px" }} />
-                <h4 style={{ fontSize: "16px", color: "#fff", marginBottom: "6px" }}>
-                  Không tìm thấy môn học nào
+              <div
+                className="glass-panel"
+                style={{
+                  padding: "60px 20px",
+                  textAlign: "center",
+                  color: "var(--text-muted)",
+                  background: "var(--bg-surface-subtle)",
+                  borderRadius: "12px",
+                }}
+              >
+                <BookOpen size={42} style={{ opacity: 0.35, marginBottom: "12px" }} />
+                <h4 style={{ fontSize: "16px", color: "var(--text-primary)", marginBottom: "6px" }}>
+                  Không tìm thấy học phần phù hợp
                 </h4>
                 <p style={{ fontSize: "13px" }}>
-                  Vui lòng thử tìm kiếm bằng từ khóa khác hoặc xóa bộ lọc khoa.
+                  Vui lòng thử tìm kiếm bằng từ khóa khác hoặc bấm nút "Tất cả các khoa" ở trên.
                 </p>
               </div>
             ) : (
@@ -272,7 +374,7 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
-                  gap: "20px",
+                  gap: "18px",
                 }}
               >
                 {courses.map((c) => (
@@ -344,7 +446,7 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
           onProfileUpdated={(updated) => {
             setCurrentUser(updated);
             if (onUpdateUser) onUpdateUser(updated);
-            showToast("success", "Đã cập nhật thông tin cá nhân và email thành công!");
+            showToast("success", "Đã cập nhật hồ sơ cá nhân thành công!");
           }}
         />
       )}
@@ -353,10 +455,10 @@ export default function DashboardPage({ user, onLogout, onUpdateUser }) {
       {toast && (
         <div className="toast-container">
           <div className={`toast ${toast.type}`}>
-            {toast.type === "success" && <CheckCircle2 size={20} color="#10b981" style={{ flexShrink: 0 }} />}
-            {toast.type === "error" && <AlertCircle size={20} color="#ef4444" style={{ flexShrink: 0 }} />}
-            {toast.type === "info" && <BellRing size={20} color="#06b6d4" style={{ flexShrink: 0 }} />}
-            <div style={{ fontSize: "14px", color: "#fff", lineHeight: 1.5 }}>
+            {toast.type === "success" && <CheckCircle2 size={18} style={{ color: "var(--success)", flexShrink: 0 }} />}
+            {toast.type === "error" && <AlertCircle size={18} style={{ color: "var(--danger)", flexShrink: 0 }} />}
+            {toast.type === "info" && <BellRing size={18} style={{ color: "var(--secondary)", flexShrink: 0 }} />}
+            <div style={{ fontSize: "13.5px", color: "var(--text-primary)", lineHeight: 1.4 }}>
               {toast.message}
             </div>
           </div>

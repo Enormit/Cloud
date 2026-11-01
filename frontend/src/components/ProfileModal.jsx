@@ -50,7 +50,7 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
       }
       setTimeout(() => {
         onClose();
-      }, 1200);
+      }, 1000);
     } catch (err) {
       setError(err.message || "Không thể cập nhật hồ sơ cá nhân.");
     } finally {
@@ -68,24 +68,26 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
         alignItems: "center",
         justifyContent: "center",
         padding: "16px",
-        background: "rgba(0, 0, 0, 0.75)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(3, 7, 18, 0.78)",
+        backdropFilter: "blur(8px)",
       }}
+      onClick={onClose}
     >
       <div
         className="glass-panel"
+        onClick={(e) => e.stopPropagation()}
         style={{
           width: "100%",
-          maxWidth: "560px",
+          maxWidth: "540px",
           maxHeight: "90vh",
           overflowY: "auto",
           borderRadius: "16px",
           border: "1px solid var(--border-color)",
-          background: "var(--bg-card)",
-          boxShadow: "0 20px 40px rgba(0, 0, 0, 0.6)",
-          padding: "24px",
+          background: "var(--bg-surface)",
+          boxShadow: "0 24px 64px rgba(0, 0, 0, 0.7)",
+          padding: "24px 28px",
           position: "relative",
-          animation: "modalSlideIn 0.25s ease-out",
+          animation: "modalSlideIn 0.2s ease-out",
         }}
       >
         {/* Header */}
@@ -96,37 +98,38 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
             justifyContent: "space-between",
             marginBottom: "20px",
             borderBottom: "1px solid var(--border-color)",
-            paddingBottom: "14px",
+            paddingBottom: "16px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div
               style={{
                 width: "40px",
                 height: "40px",
                 borderRadius: "10px",
-                background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                background: "rgba(56, 189, 248, 0.12)",
+                border: "1px solid rgba(56, 189, 248, 0.25)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#fff",
+                color: "#38bdf8",
               }}
             >
-              <User size={22} />
+              <User size={20} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#fff" }}>
-                Hồ Sơ Cá Nhân & Email
+              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, color: "#ffffff" }}>
+                Hồ Sơ Cá Nhân Sinh Viên
               </h3>
-              <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>
-                Quản lý địa chỉ nhận email thông báo và thông tin liên hệ sinh viên
+              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "var(--text-secondary)" }}>
+                Quản lý địa chỉ nhận email xác nhận đăng ký học phần
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="btn btn-secondary"
-            style={{ padding: "6px", borderRadius: "8px", color: "var(--text-secondary)" }}
+            style={{ padding: "6px", borderRadius: "8px", color: "var(--text-muted)" }}
             title="Đóng cửa sổ"
           >
             <X size={18} />
@@ -137,10 +140,10 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
         {error && (
           <div
             style={{
-              padding: "12px",
+              padding: "12px 14px",
               borderRadius: "8px",
-              background: "rgba(239, 68, 68, 0.15)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.25)",
               color: "#fca5a5",
               fontSize: "13px",
               marginBottom: "16px",
@@ -157,10 +160,10 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
         {success && (
           <div
             style={{
-              padding: "12px",
+              padding: "12px 14px",
               borderRadius: "8px",
-              background: "rgba(16, 185, 129, 0.15)",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.25)",
               color: "#6ee7b7",
               fontSize: "13px",
               marginBottom: "16px",
@@ -176,14 +179,14 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
 
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          {/* Thông tin cố định (Không được phép sửa) */}
+          {/* Thông tin định danh cố định */}
           <div
             style={{
-              background: "rgba(15, 23, 42, 0.5)",
-              border: "1px dashed var(--border-color)",
+              background: "rgba(255, 255, 255, 0.02)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: "10px",
-              padding: "14px",
-              marginBottom: "18px",
+              padding: "14px 16px",
+              marginBottom: "20px",
             }}
           >
             <div
@@ -192,14 +195,14 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
                 fontWeight: 600,
                 color: "var(--text-muted)",
                 textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                marginBottom: "8px",
+                letterSpacing: "0.05em",
+                marginBottom: "10px",
                 display: "flex",
                 alignItems: "center",
-                gap: "5px",
+                gap: "6px",
               }}
             >
-              <Lock size={12} /> Thông tin định danh cố định (do nhà trường quản lý)
+              <Lock size={12} /> Thông tin định danh hệ thống (Không chỉnh sửa)
             </div>
             <div
               style={{
@@ -210,27 +213,37 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
               }}
             >
               <div>
-                <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>MSSV:</span>
-                <div style={{ fontWeight: 600, color: "#38bdf8", marginTop: "2px" }}>
+                <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>Mã sinh viên (MSSV):</span>
+                <div style={{ fontWeight: 700, fontFamily: "var(--font-mono)", color: "#38bdf8", marginTop: "2px" }}>
                   {user.mssv || user.username}
                 </div>
               </div>
               <div>
-                <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>Tài khoản:</span>
+                <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>Tài khoản đăng nhập:</span>
                 <div style={{ fontWeight: 600, color: "#f8fafc", marginTop: "2px" }}>
                   {user.username}
                 </div>
               </div>
               <div>
-                <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>Chuyên ngành:</span>
-                <div style={{ fontWeight: 600, color: "#cbd5e1", marginTop: "2px" }}>
-                  {user.major || "Công nghệ Thông tin"}
+                <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>Khoa đào tạo:</span>
+                <div style={{ fontWeight: 500, color: "#cbd5e1", marginTop: "2px" }}>
+                  {user.major || "Khoa Công nghệ Thông tin"}
                 </div>
               </div>
               <div>
-                <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>Vai trò:</span>
+                <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>Phân quyền:</span>
                 <div style={{ marginTop: "2px" }}>
-                  <span className="badge badge-primary" style={{ fontSize: "10px" }}>
+                  <span
+                    style={{
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      background: "rgba(99, 102, 241, 0.15)",
+                      color: "#a5b4fc",
+                      border: "1px solid rgba(99, 102, 241, 0.25)",
+                    }}
+                  >
                     {user.is_staff ? "Quản trị viên" : "Sinh viên chính quy"}
                   </span>
                 </div>
@@ -239,7 +252,7 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
           </div>
 
           {/* Các thông tin cho phép chỉnh sửa */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Họ & Tên */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
               <div>
@@ -305,7 +318,7 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
                 <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                   <Mail size={14} color="#38bdf8" /> Email nhận thông báo học phần
                 </span>
-                <span style={{ fontSize: "11px", color: "#38bdf8" }}>* Nhận mail khi ĐK/Huỷ môn</span>
+                <span style={{ fontSize: "11px", color: "#38bdf8" }}>* Tự động gửi thư khi ĐK / Hủy</span>
               </label>
               <input
                 type="email"
@@ -317,8 +330,8 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
                 style={{ width: "100%" }}
                 required
               />
-              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
-                Hệ thống AWS SES / Email Service sẽ tự động gửi thư xác nhận đăng ký và hủy môn học tới địa chỉ này.
+              <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px", lineHeight: 1.4 }}>
+                Hệ thống Google Mail Lambda Worker sẽ tự động gửi thư biên lai xác nhận đăng ký và hủy môn học tới địa chỉ này.
               </div>
             </div>
 
@@ -361,7 +374,7 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
                   marginBottom: "6px",
                 }}
               >
-                <MapPin size={14} color="#10b981" /> Địa chỉ cư trú
+                <MapPin size={14} color="#34d399" /> Địa chỉ cư trú
               </label>
               <input
                 type="text"
@@ -394,7 +407,7 @@ export default function ProfileModal({ isOpen, onClose, user, onProfileUpdated }
               className="btn btn-secondary"
               style={{ padding: "8px 16px" }}
             >
-              Hủy
+              Đóng
             </button>
             <button
               type="submit"

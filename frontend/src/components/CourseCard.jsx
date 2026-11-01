@@ -7,8 +7,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
-  BookMarked,
   XCircle,
+  Calendar,
 } from "lucide-react";
 
 export default function CourseCard({
@@ -24,46 +24,55 @@ export default function CourseCard({
     Math.round((course.registered_count / course.max_capacity) * 100)
   );
 
+  const availableSlots = Math.max(0, course.max_capacity - course.registered_count);
+  const isFull = availableSlots <= 0;
+
   return (
     <div
       id={`course-card-${course.code}`}
       className="glass-panel"
       style={{
-        padding: "20px",
+        padding: "18px 20px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        gap: "16px",
+        gap: "14px",
         position: "relative",
-        overflow: "hidden",
-        borderLeft: course.is_registered
-          ? "4px solid var(--success)"
+        background: course.is_registered
+          ? "rgba(16, 185, 129, 0.04)"
           : course.has_conflict
-          ? "4px solid var(--warning)"
-          : "1px solid var(--border-color)",
+          ? "rgba(245, 158, 11, 0.04)"
+          : "var(--bg-surface)",
+        borderColor: course.is_registered
+          ? "var(--success-border)"
+          : course.has_conflict
+          ? "var(--warning-border)"
+          : "var(--border-subtle)",
       }}
     >
-      {/* Top Meta: Code, Credits, Department */}
+      {/* Top Header: Code, Department & Status */}
       <div>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: "8px",
             marginBottom: "10px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <span
               style={{
                 fontFamily: "var(--font-mono)",
                 fontWeight: 700,
-                fontSize: "14px",
-                color: "#38bdf8",
-                background: "rgba(56, 189, 248, 0.12)",
-                padding: "3px 8px",
-                borderRadius: "6px",
-                border: "1px solid rgba(56, 189, 248, 0.25)",
+                fontSize: "13px",
+                color: "#60a5fa",
+                background: "var(--primary-subtle)",
+                padding: "2px 7px",
+                borderRadius: "5px",
+                border: "1px solid var(--primary-border)",
+                letterSpacing: "0.2px",
               }}
             >
               {course.code}
@@ -71,213 +80,169 @@ export default function CourseCard({
             <span className="badge badge-primary">{course.credits} Tín chỉ</span>
           </div>
 
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            {course.department}
-          </span>
+          <div>
+            {course.is_registered ? (
+              <span className="badge badge-success">
+                <CheckCircle2 size={12} /> Đã Đăng Ký
+              </span>
+            ) : course.has_conflict ? (
+              <span className="badge badge-warning">
+                <AlertTriangle size={12} /> Trùng Lịch
+              </span>
+            ) : (
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                {course.department}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Course Name */}
+        {/* Course Title */}
         <h3
           style={{
-            fontSize: "16px",
+            fontSize: "15.5px",
             fontWeight: 700,
             lineHeight: 1.4,
-            marginBottom: "14px",
-            color: "#ffffff",
+            marginBottom: "12px",
+            color: "var(--text-primary)",
           }}
         >
           {course.name}
         </h3>
 
-        {/* Schedule & Instructor Meta */}
+        {/* Schedule & Room Grid */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: "10px",
-            fontSize: "13px",
+            gap: "8px",
+            fontSize: "12.5px",
             color: "var(--text-secondary)",
-            background: "rgba(0, 0, 0, 0.2)",
-            padding: "12px",
-            borderRadius: "10px",
-            marginBottom: "14px",
+            background: "var(--bg-surface-subtle)",
+            padding: "10px 12px",
+            borderRadius: "8px",
+            border: "1px solid var(--border-subtle)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <Clock size={15} color="#38bdf8" />
-            <span>
-              <strong style={{ color: "#e2e8f0" }}>{course.schedule_day}</strong> (Tiết {course.schedule_periods})
+            <Calendar size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <span>{course.schedule_day || "Chưa xếp"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <Clock size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <span>Tiết {course.schedule_periods || "--"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <MapPin size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {course.room || "P.A101"}
             </span>
           </div>
-
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <MapPin size={15} color="#f472b6" />
-            <span>Phòng: <strong style={{ color: "#e2e8f0" }}>{course.room}</strong></span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              gridColumn: "span 2",
-            }}
-          >
-            <User size={15} color="#a78bfa" />
-            <span>Giảng viên: <strong style={{ color: "#e2e8f0" }}>{course.instructor}</strong></span>
+            <User size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {course.instructor || "Giảng viên"}
+            </span>
           </div>
         </div>
+      </div>
 
-        {/* Capacity Progress Bar */}
-        <div style={{ marginBottom: "12px" }}>
+      {/* Capacity & Action Controls */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {/* Capacity Bar */}
+        <div>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
+              alignItems: "center",
               fontSize: "12px",
-              color: "var(--text-secondary)",
               marginBottom: "5px",
             }}
           >
-            <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <Users size={14} />
-              Sĩ số lớp:
+            <span style={{ color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+              <Users size={12} /> Sĩ số lớp:
             </span>
-            <span>
-              <strong
-                style={{
-                  color: course.is_full ? "var(--danger)" : "#ffffff",
-                }}
-              >
-                {course.registered_count}
-              </strong>
-              /{course.max_capacity} (Còn {course.remaining_slots} chỗ)
+            <span
+              style={{
+                fontWeight: 600,
+                color: isFull ? "var(--danger)" : percentFilled > 80 ? "var(--warning)" : "var(--text-secondary)",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {course.registered_count} / {course.max_capacity} ({isFull ? "Đầy chỗ" : `còn ${availableSlots} chỗ`})
             </span>
           </div>
 
           <div
             style={{
               width: "100%",
-              height: "6px",
-              borderRadius: "3px",
+              height: "5px",
               background: "rgba(255, 255, 255, 0.08)",
+              borderRadius: "3px",
               overflow: "hidden",
             }}
           >
             <div
               style={{
-                width: `${percentFilled}%`,
                 height: "100%",
+                width: `${percentFilled}%`,
+                background: isFull
+                  ? "var(--danger)"
+                  : percentFilled > 85
+                  ? "var(--warning)"
+                  : "var(--primary)",
                 borderRadius: "3px",
-                background:
-                  course.is_full
-                    ? "var(--danger)"
-                    : percentFilled > 80
-                    ? "var(--warning)"
-                    : "linear-gradient(90deg, #10b981, #06b6d4)",
                 transition: "width 0.3s ease",
               }}
             />
           </div>
         </div>
 
-        {/* Conflict Alert Callout */}
-        {course.has_conflict && !course.is_registered && (
-          <div
-            style={{
-              background: "rgba(245, 158, 11, 0.1)",
-              border: "1px solid rgba(245, 158, 11, 0.3)",
-              borderRadius: "8px",
-              padding: "8px 12px",
-              fontSize: "12px",
-              color: "#fcd34d",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-              marginBottom: "12px",
-            }}
+        {/* Buttons Row */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            onClick={() => onViewDetails && onViewDetails(course)}
+            className="btn btn-secondary"
+            style={{ padding: "7px 11px", fontSize: "12.5px", flexShrink: 0 }}
+            title="Xem chi tiết học phần"
           >
-            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
-            <span>{course.conflict_reason}</span>
-          </div>
-        )}
+            <Info size={14} />
+            <span>Chi tiết</span>
+          </button>
 
-        {/* Prerequisites */}
-        {course.prerequisites && course.prerequisites !== "Không" && (
-          <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "8px" }}>
-            Môn tiên quyết: <span style={{ color: "#a5b4fc" }}>{course.prerequisites}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Actions */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "10px",
-          borderTop: "1px solid var(--border-color)",
-          paddingTop: "14px",
-        }}
-      >
-        <button
-          id={`view-detail-btn-${course.code}`}
-          onClick={() => onViewDetails(course)}
-          className="btn btn-secondary"
-          style={{ padding: "8px 12px", fontSize: "12px" }}
-          title="Xem đề cương chi tiết"
-        >
-          <Info size={14} />
-          Đề cương
-        </button>
-
-        {course.is_registered ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span
-              className="badge badge-success"
-              style={{ padding: "6px 12px", fontSize: "12px" }}
-            >
-              <CheckCircle2 size={14} />
-              Đã đăng ký
-            </span>
+          {course.is_registered ? (
             <button
-              id={`cancel-btn-${course.code}`}
-              onClick={() => onCancel(course)}
+              onClick={() => onCancel && onCancel(course)}
               disabled={loading || !windowOpen}
               className="btn btn-danger"
-              style={{ padding: "7px 12px", fontSize: "12px" }}
-              title="Hủy đăng ký môn học này (gửi email thông báo)"
+              style={{ width: "100%", fontSize: "12.5px" }}
             >
               <XCircle size={14} />
-              Hủy môn
+              <span>Hủy Học Phần</span>
             </button>
-          </div>
-        ) : (
-          <button
-            id={`register-btn-${course.code}`}
-            onClick={() => onRegister(course)}
-            disabled={
-              loading ||
-              !windowOpen ||
-              course.is_full ||
-              course.has_conflict
-            }
-            className="btn btn-primary"
-            style={{
-              padding: "8px 16px",
-              fontSize: "13px",
-              minWidth: "120px",
-            }}
-          >
-            <BookMarked size={15} />
-            {course.is_full
-              ? "Hết chỗ"
-              : course.has_conflict
-              ? "Trùng lịch"
-              : "Đăng ký"}
-          </button>
-        )}
+          ) : (
+            <button
+              onClick={() => onRegister && onRegister(course)}
+              disabled={loading || !windowOpen || isFull || course.has_conflict}
+              className="btn btn-primary"
+              style={{ width: "100%", fontSize: "12.5px" }}
+            >
+              {isFull ? (
+                <span>Lớp Đã Đầy</span>
+              ) : course.has_conflict ? (
+                <span>Trùng Lịch Học</span>
+              ) : !windowOpen ? (
+                <span>Cổng Đã Đóng</span>
+              ) : (
+                <>
+                  <CheckCircle2 size={14} />
+                  <span>Đăng Ký Ngay</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
