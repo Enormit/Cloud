@@ -11,11 +11,12 @@ Bộ tài liệu được chia thành các phần chuyên sâu dưới đây:
 ### 1. [Kiến Trúc & Thiết Kế Hệ Thống (Architecture & Design)](./ARCHITECTURE_AND_DESIGN.md)
 *Tài liệu chuyên sâu phân tích toàn bộ tư duy thiết kế, phù hợp để trình bày đồ án tốt nghiệp, báo cáo kiến trúc và phỏng vấn kỹ thuật Cloud/DevOps.*
 - **Lý do chọn đề tài:** Giải bài toán Flash Crowd (tải tăng đột biến vào giờ mở cổng đăng ký), đảm bảo tính toàn vẹn dữ liệu và tối ưu chi phí khi nhàn rỗi.
-- **Sơ đồ kiến trúc tổng thể:** Mô hình phòng thủ đa tầng kết hợp CloudFront, WAF, S3, ALB, ECS Fargate, DynamoDB và Lambda Worker.
+- **Sơ đồ kiến trúc tổng thể:** Mô hình phòng thủ đa tầng kết hợp CloudFront, WAF, S3, ALB, ECS Fargate, DynamoDB và Lambda Worker (kết hợp Google SMTP, hoàn toàn không dùng SES hay Secrets Manager).
 - **Tại sao kiến trúc này BẢO MẬT (Security-in-Depth):** Xác thực OIDC không lưu key cố định, Custom Origin Header Verify, ALB-only Ingress Security Group, DynamoDB VPC Gateway Endpoint.
-- **Tại sao kiến trúc này CHI PHÍ CỰC THẤP:** Bí quyết loại bỏ hoàn toàn NAT Gateway ($0 NAT), Fargate Spot tỷ lệ 4:1, DynamoDB On-Demand. Bảng so sánh chi phí tiết kiệm hơn 85% so với kiến trúc truyền thống.
+- **Tại sao kiến trúc này CHI PHÍ CỰC THẤP:** Bí quyết loại bỏ hoàn toàn NAT Gateway ($0 NAT), không dùng SES, không dùng Secrets Manager, Fargate Spot tỷ lệ 4:1, DynamoDB On-Demand. Bảng so sánh chi phí tiết kiệm hơn 85% so với kiến trúc truyền thống.
 - **Hiệu năng & Khả năng chịu lỗi:** Xử lý bất đồng bộ, Multi-AZ High Availability, Rolling Update không downtime với Circuit Breaker.
 - **Cơ chế Co Giãn Tự Động (Auto Scaling):** Chi tiết công thức tính toán và chu kỳ kích hoạt của Scale-Out (3 phút) và Scale-In (15 phút chống thrashing).
+- **Các Test Case Thực Chiến:** 6 kịch bản kiểm thử thực tế từ sửa lỗi login 401, $0 NAT ECR pull, stress test 14,307 requests k6, đến fix OIDC qua CloudTrail.
 - **Phân tích Ưu & Nhược điểm (Trade-offs):** Đánh giá khách quan và lộ trình nâng cấp hệ thống trong tương lai.
 
 ---

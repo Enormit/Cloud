@@ -68,7 +68,7 @@ terraform/
     ├── compute/            # ECR, ECS Fargate, Capacity Providers, Auto Scaling
     ├── database/           # 6 bảng DynamoDB On-Demand & AWS Backup Vault
     ├── storage/            # S3 Bucket lưu trữ React Single Page App
-    ├── lambda/             # Lambda Email Worker xử lý gửi email bất đồng bộ
+    ├── lambda/             # Lambda Email Worker gửi email bất đồng bộ qua Google SMTP (Không dùng SES)
     ├── monitoring/         # CloudWatch Dashboard, Metric Alarms, CloudTrail
     └── cicd_oidc/          # AWS IAM OIDC Provider & GitHub Actions Deploy Role
 ```
