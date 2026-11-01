@@ -17,7 +17,7 @@ env:
   ECR_REPOSITORY: course-registration-backend
   ECS_CLUSTER: course-registration-cluster
   ECS_SERVICE: course-registration-backend-service
-  S3_BUCKET: course-registration-frontend-production
+  S3_BUCKET: course-registration-frontend-755272426779
 
 jobs:
   # =========================================================================
