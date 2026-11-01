@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="REST API cho Hệ Thống Đăng Ký Môn Học Sinh Viên - Hỗ trợ DynamoDB, AWS SES, AWS Secrets Manager",
-    version="2.0.0",
+    version="2.0.1",
     lifespan=lifespan,
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -57,7 +57,7 @@ async def root():
     return {
         "app": settings.PROJECT_NAME,
         "status": "healthy",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "environment": settings.ENVIRONMENT,
         "email_provider": settings.EMAIL_PROVIDER,
         "docs_url": "/api/docs",
@@ -68,4 +68,4 @@ async def root():
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint used by ALB Target Group."""
-    return {"status": "ok", "service": "backend"}
+    return {"status": "ok", "service": "backend", "version": "2.0.1"}
