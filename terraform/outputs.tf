@@ -84,6 +84,17 @@ output "lambda_email_worker_name" {
   description = "Name of Email Worker Lambda function"
 }
 
+# Custom Domain Outputs (Route 53 & CloudFront)
+output "application_url" {
+  value       = "https://${var.domain_name}"
+  description = "Public URL of the application on Route 53 custom domain (HTTPS)"
+}
+
+output "application_www_url" {
+  value       = "https://www.${var.domain_name}"
+  description = "Public WWW URL of the application (HTTPS)"
+}
+
 # GitHub Actions OIDC CI/CD Outputs
 output "github_actions_role_arn" {
   value       = module.cicd_oidc.github_actions_role_arn

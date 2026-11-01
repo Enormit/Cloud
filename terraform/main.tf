@@ -111,8 +111,41 @@ module "monitoring" {
   lambda_function_name       = module.lambda.lambda_function_name
 }
 
+# Route 53 Hosted Zone for Custom Domain (enormitpham.me)
+data "aws_route53_zone" "main" {
+  name         = var.domain_name
+  private_zone = false
+}
+
+# Automated DNS Validation Records for ACM Certificate in Route 53
+resource "aws_route53_record" "cert_validation" {
+  for_each = {
+    for dvo in module.security.acm_domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.main.zone_id
+}
+
+# Wait for ACM Certificate Validation to Complete
+resource "aws_acm_certificate_validation" "cert" {
+  provider                = aws.us_east_1
+  certificate_arn         = module.security.acm_certificate_arn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+}
+
 # CloudFront Distribution
 resource "aws_cloudfront_distribution" "frontend" {
+  aliases = [var.domain_name, "www.${var.domain_name}"]
+
   origin {
     domain_name = module.storage.frontend_website_endpoint
     origin_id   = "S3Frontend"
@@ -177,11 +210,65 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   tags = {
     Name = "${var.project}-cloudfront"
+  }
+}
+
+# Route 53 DNS Record: enormitpham.me (IPv4)
+resource "aws_route53_record" "apex" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route 53 DNS Record: enormitpham.me (IPv6)
+resource "aws_route53_record" "apex_ipv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.domain_name
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route 53 DNS Record: www.enormitpham.me (IPv4)
+resource "aws_route53_record" "www" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Route 53 DNS Record: www.enormitpham.me (IPv6)
+resource "aws_route53_record" "www_ipv6" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "www.${var.domain_name}"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
+    evaluate_target_health = false
   }
 }
 

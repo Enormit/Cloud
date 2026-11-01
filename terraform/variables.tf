@@ -18,7 +18,7 @@ variable "environment" {
 
 variable "domain_name" {
   type        = string
-  default     = "course-registration.edu.vn"
+  default     = "enormitpham.me"
   description = "Domain name for application"
 }
 

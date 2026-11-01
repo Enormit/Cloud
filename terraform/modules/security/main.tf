@@ -163,10 +163,12 @@ resource "aws_wafv2_web_acl" "cloudfront" {
   }
 }
 
-# ACM Certificate
+# ACM Certificate for CloudFront (Must be deployed to us-east-1)
 resource "aws_acm_certificate" "main" {
-  domain_name       = var.domain_name
-  validation_method = "DNS"
+  provider                  = aws.us_east_1
+  domain_name               = var.domain_name
+  subject_alternative_names = ["*.${var.domain_name}"]
+  validation_method         = "DNS"
 
   lifecycle {
     create_before_destroy = true

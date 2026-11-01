@@ -18,6 +18,10 @@ output "acm_certificate_arn" {
   value = aws_acm_certificate.main.arn
 }
 
+output "acm_domain_validation_options" {
+  value = aws_acm_certificate.main.domain_validation_options
+}
+
 output "ecs_task_execution_role_arn" {
   value = aws_iam_role.ecs_task_execution.arn
 }
