@@ -102,3 +102,9 @@ variable "ecr_retain_image_count" {
   default     = 30
   description = "Number of recent tagged ECR images to retain for rollback"
 }
+
+variable "container_insights" {
+  type        = string
+  default     = "enhanced"
+  description = "Container Insights mode: enhanced (task/container level) or enabled"
+}

@@ -90,6 +90,12 @@ variable "log_retention_days" {
   description = "CloudWatch log retention in days"
 }
 
+variable "container_insights" {
+  type        = string
+  default     = "enhanced"
+  description = "Container Insights mode for ECS: enhanced (task/container level) or enabled"
+}
+
 variable "email_provider" {
   type        = string
   default     = "lambda"

@@ -75,6 +75,7 @@ module "compute" {
   log_retention_days          = var.log_retention_days
   secrets_manager_name        = var.secrets_manager_name
   email_provider              = var.email_provider
+  container_insights          = var.container_insights
 }
 
 # Database Module (DynamoDB)
@@ -107,6 +108,7 @@ module "monitoring" {
   cloudfront_distribution_id = aws_cloudfront_distribution.frontend.id
   cloudfront_waf_name        = element(split("/", aws_cloudfront_distribution.frontend.web_acl_id), 2)
   environment                = var.environment
+  lambda_function_name       = module.lambda.lambda_function_name
 }
 
 # CloudFront Distribution

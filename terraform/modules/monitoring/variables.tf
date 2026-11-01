@@ -48,3 +48,9 @@ variable "environment" {
   default     = "production"
   description = "Environment name"
 }
+
+variable "lambda_function_name" {
+  type        = string
+  default     = ""
+  description = "Name of the Email Worker Lambda function for monitoring"
+}

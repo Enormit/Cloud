@@ -102,6 +102,74 @@ resource "aws_cloudwatch_dashboard" "main" {
           region = var.region
           title  = "ALB Traffic & Errors"
         }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["ECS/ContainerInsights", "NetworkRxBytes", "ServiceName", var.ecs_service_name, "ClusterName", var.ecs_cluster_name],
+            [".", "NetworkTxBytes", ".", ".", ".", "."]
+          ]
+          period = 60
+          stat   = "Average"
+          region = var.region
+          title  = "ECS Container Insights - Network I/O (Rx/Tx)"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["ECS/ContainerInsights", "StorageReadBytes", "ServiceName", var.ecs_service_name, "ClusterName", var.ecs_cluster_name],
+            [".", "StorageWriteBytes", ".", ".", ".", "."],
+            [".", "RunningTaskCount", "ServiceName", var.ecs_service_name, "ClusterName", var.ecs_cluster_name, { "yAxis": "right" }]
+          ]
+          period = 60
+          stat   = "Average"
+          region = var.region
+          title  = "ECS Container Insights - Storage I/O & Running Tasks"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 12
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/Lambda", "Invocations", "FunctionName", var.lambda_function_name],
+            [".", "Errors", ".", "."]
+          ]
+          period = 60
+          stat   = "Sum"
+          region = var.region
+          title  = "Lambda Email Worker - Invocations & Errors"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 12
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/Lambda", "Duration", "FunctionName", var.lambda_function_name]
+          ]
+          period = 60
+          stat   = "Average"
+          region = var.region
+          title  = "Lambda Email Worker - Duration (Latency ms)"
+        }
       }
     ]
   })
