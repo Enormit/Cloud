@@ -13,9 +13,9 @@ variable "account_id" {
   description = "AWS account ID"
 }
 
-variable "private_subnet_ids" {
+variable "subnet_ids" {
   type        = list(string)
-  description = "Private subnet IDs"
+  description = "Subnet IDs for ECS tasks"
 }
 
 variable "ecs_security_group_id" {
@@ -88,6 +88,7 @@ variable "log_retention_days" {
 
 variable "secrets_manager_name" {
   type        = string
+  default     = ""
   description = "Secrets Manager secret name"
 }
 

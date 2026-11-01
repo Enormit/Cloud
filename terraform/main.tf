@@ -60,7 +60,7 @@ module "compute" {
   project                     = var.project
   region                      = var.aws_region
   account_id                  = data.aws_caller_identity.current.account_id
-  private_subnet_ids          = module.networking.private_subnet_ids
+  subnet_ids                  = module.networking.public_subnet_ids
   ecs_security_group_id       = module.security.ecs_security_group_id
   target_group_arn            = module.networking.target_group_arn
   ecs_task_execution_role_arn = module.security.ecs_task_execution_role_arn

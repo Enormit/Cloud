@@ -75,6 +75,12 @@ resource "aws_cloudwatch_log_group" "ecs" {
   }
 }
 
+# JWT Secret Key for Backend Authentication
+resource "random_password" "jwt_secret" {
+  length  = 64
+  special = false
+}
+
 # ECS Task Definition
 resource "aws_ecs_task_definition" "backend" {
   family                   = "${var.project}-backend"
@@ -128,18 +134,11 @@ resource "aws_ecs_task_definition" "backend" {
         },
         {
           name  = "USE_AWS_SECRETS"
-          value = "true"
+          value = "false"
         },
         {
-          name  = "AWS_SECRET_NAME"
-          value = var.secrets_manager_name
-        }
-      ]
-
-      secrets = [
-        {
-          name      = "SECRET_KEY"
-          valueFrom = "arn:aws:secretsmanager:${var.region}:${var.account_id}:secret:${var.secrets_manager_name}:SECRET_KEY::"
+          name  = "SECRET_KEY"
+          value = random_password.jwt_secret.result
         }
       ]
     }
@@ -170,9 +169,9 @@ resource "aws_ecs_service" "backend" {
   }
 
   network_configuration {
-    subnets          = var.private_subnet_ids
+    subnets          = var.subnet_ids
     security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {
