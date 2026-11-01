@@ -3,7 +3,10 @@ data "aws_ec2_managed_prefix_list" "cloudfront" {
   name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 
-# ALB Security Group (allows ingress ONLY from CloudFront)
+# ALB Security Group (allows ingress ONLY from CloudFront on HTTP port 80)
+# Note: CloudFront origin-facing prefix list has a quota weight of 55 rules.
+# Adding both 80 and 443 exceeds AWS default quota of 60 rules per SG (55 * 2 = 110).
+# Since CloudFront connects to ALB via HTTP on port 80, only port 80 is required.
 resource "aws_security_group" "alb" {
   name        = "${var.project}-alb-sg"
   description = "ALB security group"
@@ -12,13 +15,6 @@ resource "aws_security_group" "alb" {
   ingress {
     from_port       = 80
     to_port         = 80
-    protocol        = "tcp"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
-  }
-
-  ingress {
-    from_port       = 443
-    to_port         = 443
     protocol        = "tcp"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
   }
