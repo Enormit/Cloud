@@ -146,3 +146,28 @@ variable "secrets_manager_name" {
   default     = "prod/app/backend"
   description = "Secrets Manager secret name for backend"
 }
+
+# GitHub OIDC CI/CD variables
+variable "github_org" {
+  type        = string
+  default     = "Enormit"
+  description = "GitHub organization or user owning the repository"
+}
+
+variable "github_repo" {
+  type        = string
+  default     = "Cloud"
+  description = "GitHub repository name"
+}
+
+variable "github_branch" {
+  type        = string
+  default     = "main"
+  description = "GitHub branch allowed to deploy via OIDC"
+}
+
+variable "create_github_oidc_provider" {
+  type        = bool
+  default     = true
+  description = "Whether to create GitHub OIDC identity provider (set false if already created in AWS account)"
+}

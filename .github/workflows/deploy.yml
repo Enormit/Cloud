@@ -7,12 +7,17 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+# Quyền hạn cấp cho GitHub Actions (Bắt buộc id-token: write để xác thực OIDC)
+permissions:
+  id-token: write # Cần thiết để tạo OIDC JWT token trao đổi với AWS STS
+  contents: read  # Cần thiết để checkout mã nguồn
+
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REPOSITORY: course-reg-backend
-  ECS_CLUSTER: course-reg-cluster
-  ECS_SERVICE: course-reg-backend-service
-  S3_BUCKET: course-reg-frontend-production
+  ECR_REPOSITORY: course-registration-backend
+  ECS_CLUSTER: course-registration-cluster
+  ECS_SERVICE: course-registration-backend-service
+  S3_BUCKET: course-registration-frontend-production
 
 jobs:
   # =========================================================================
@@ -42,7 +47,7 @@ jobs:
       - name: Code Syntax & Style Check
         run: |
           cd backend
-          # Stop build if there are Python syntax errors or undefined names
+          # Dừng build nếu có lỗi cú pháp Python hoặc biến chưa định nghĩa
           flake8 app --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Verify App Imports & Schemas
@@ -81,10 +86,10 @@ jobs:
           VITE_API_BASE_URL: /api
 
   # =========================================================================
-  # 3. BUILD DOCKER IMAGE & DEPLOY TO AWS (Chỉ chạy trên branch main)
+  # 3. BUILD DOCKER IMAGE & DEPLOY TO AWS VIA OIDC (Chỉ chạy trên branch main)
   # =========================================================================
   deploy:
-    name: Deploy to AWS (ECR + ECS Fargate + S3)
+    name: Deploy to AWS via OIDC (ECR + ECS Fargate + S3)
     needs: [backend-ci, frontend-ci]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -93,11 +98,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
+      # Xác thực AWS qua OIDC (Keyless Authentication - Hoàn toàn không lưu Access Key)
+      - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActions-${{ github.run_id }}
           aws-region: ${{ env.AWS_REGION }}
 
       # ----------------- BACKEND: BUILD & PUSH ECR & UPDATE ECS -----------------
@@ -144,8 +150,13 @@ jobs:
           aws s3 sync ./frontend/dist s3://${{ env.S3_BUCKET }} --delete
 
       - name: Invalidate CloudFront Cache (Optional)
-        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
         run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+          if [ -n "$DIST_ID" ]; then
+            echo "Invalidating CloudFront distribution $DIST_ID..."
+            aws cloudfront create-invalidation \
+              --distribution-id "$DIST_ID" \
+              --paths "/*"
+          else
+            echo "CLOUDFRONT_DISTRIBUTION_ID is not set, skipping cache invalidation."
+          fi

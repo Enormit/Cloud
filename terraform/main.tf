@@ -184,3 +184,24 @@ resource "aws_cloudfront_distribution" "frontend" {
     Name = "${var.project}-cloudfront"
   }
 }
+
+# GitHub Actions OIDC CI/CD Module (Keyless Deployment)
+module "cicd_oidc" {
+  source = "./modules/cicd_oidc"
+
+  project                     = var.project
+  environment                 = var.environment
+  aws_region                  = var.aws_region
+  account_id                  = data.aws_caller_identity.current.account_id
+  github_org                  = var.github_org
+  github_repo                 = var.github_repo
+  github_branch               = var.github_branch
+  create_oidc_provider        = var.create_github_oidc_provider
+  ecr_repository_name         = module.compute.ecr_repository_name
+  ecs_cluster_name            = module.compute.ecs_cluster_name
+  ecs_service_name            = module.compute.ecs_service_name
+  frontend_bucket_arn         = module.storage.frontend_bucket_arn
+  cloudfront_distribution_id  = aws_cloudfront_distribution.frontend.id
+  ecs_task_execution_role_arn = module.security.ecs_task_execution_role_arn
+  ecs_task_role_arn           = module.security.ecs_task_role_arn
+}

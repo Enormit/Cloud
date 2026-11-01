@@ -83,3 +83,14 @@ output "lambda_email_worker_name" {
   value       = module.lambda.lambda_function_name
   description = "Name of Email Worker Lambda function"
 }
+
+# GitHub Actions OIDC CI/CD Outputs
+output "github_actions_role_arn" {
+  value       = module.cicd_oidc.github_actions_role_arn
+  description = "IAM Role ARN to configure in GitHub Actions (role-to-assume)"
+}
+
+output "github_oidc_provider_arn" {
+  value       = module.cicd_oidc.oidc_provider_arn
+  description = "ARN of the GitHub OIDC Identity Provider in AWS IAM"
+}
